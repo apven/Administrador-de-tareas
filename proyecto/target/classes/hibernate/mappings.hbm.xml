@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+ "-//Hibernate/Hibernate Mapping DTD//EN"
+ "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="bd2.model">
+ 
+ <!-- Clase Sitio -->
+ 
+ 	<class name="Sitio" table="SITIO">
+		<id name="idSitio" column="ID_SITIO">
+			<generator class="increment"/>
+		</id>
+		<set name="usuarios" cascade="all">
+			<key column="ID_SITIO"/>
+			<one-to-many class="Usuario"/>
+		</set>	
+		<set name="proyectos" cascade="all">
+			<key column="ID_SITIO"/>
+			<one-to-many class="Proyecto"/>
+		</set>
+	</class>
+
+<!--  Clase Usuario -->
+
+	<class name="Usuario" table="USUARIO">
+		<id name="idUsuario" column="ID_USUARIO">
+			<generator class="increment"/>
+		</id>
+		
+		<property name="email" column="EMAIL" />
+		<property name="nombre" column="NOMBRE" />
+
+	</class>
+	
+<!-- Clase Proyecto -->
+
+	<class name="Proyecto" table="PROYECTO">
+		<id name="idProyecto" column="ID_PROYECTO">
+			<generator class="increment"/>
+		</id>
+		<set name="pizarras" cascade="all">
+			<key column="ID_PROYECTO"/>
+			<one-to-many class="Pizarra"/>
+		</set>	
+		<set name="pizarrasArchivadas" cascade="all">
+			<key column="ID_PROYECTO_ARCHIVADAS"/>
+			<one-to-many class="Pizarra"/>
+		</set>
+		<set name="perfiles" cascade="all">
+			<key column="ID_PROYECTO"/>
+			<one-to-many class="PerfilDeUsuario"/>
+		</set>
+	</class>	
+
+
+<!-- Clase PerfilDeUsuario. Estrategia jerarquia: Tabla por cada clase -->
+
+	<class name="PerfilDeUsuario" table="PERFILDEUSUARIO">
+		<id name="idPerfilDeUsuario" column="ID_PERFILDEUSUARIO">
+			<generator class="increment"/>
+		</id>
+		<property name="fechaDeCreacion" />
+	
+		<many-to-one name="usuario" column="ID_USUARIO" cascade="all"/>
+		
+		<joined-subclass name="PerfilDeAdministrador" table="PERFILDEADMINISTRADOR">
+	            <key column="ID_PERFILDEUSUARIO"  />
+	            <property name="creador" column="CREADOR"/>
+	    </joined-subclass>
+	
+	</class>
+
+
+<!-- Clase Pizarra -->
+
+	<class name="Pizarra" table="PIZARRA">
+		<id name="idPizarra" column="ID_PIZARRA">
+			<generator class="increment" />
+		</id>
+		
+		<property name="nombre" />
+	
+		<set name="tareas" cascade="all">
+			<key column="ID_PIZARRA"/>
+			<one-to-many class="Tarea"/>
+		</set>	
+	
+	</class>
+
+<!-- Clase Tarea. Estrategia jerarquia: Tabla por clase -->
+
+	<class name="Tarea" table="TAREA">
+		<id name="idTarea" column="ID_TAREA">
+			<generator class="increment"/>
+		</id>
+		<discriminator column="TIPO_TAREA" type="string" />
+		
+		<property name="completa" column="COMPLETA" />
+		<property name="fechaLimite" column="FECHA_LIMITE" />
+		<property name="descripcion" column="DESCRIPCION" />
+		<list name="pasos" cascade="all">
+			<key column="ID_TAREA" />
+			<list-index column="NUMERO_TAREA"/>
+			<one-to-many class="Paso"/>
+		</list>	
+	
+		<subclass name="TareaDeInvestigacion" discriminator-value="TI">
+			<property name="hipotesis" column="HIPOTESIS"/>
+			<property name="resultado" column="RESULTADO"/>
+		</subclass>
+		
+		<subclass name="TareaDeDesarrollo" discriminator-value="TD">
+			<property name="requerimientos" column="REQUERIMIENTOS" type="text"/>
+		</subclass>
+	
+	</class>
+	
+	
+<!-- Clase Paso -->
+
+	<class name="Paso" table="PASO">
+		<id name="idPaso" column="ID_PASO">
+			<generator class="increment"/>
+		</id>
+	
+		<property name="fechaDeIngreso"/>
+		
+		<many-to-one name="pizarra" column="ID_PIZARRA" cascade="all" /> 
+	
+	</class>
+	
+</hibernate-mapping>
